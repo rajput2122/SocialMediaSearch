@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.*;
 
-@Document(indexName = "locations", createIndex = false)
+@Document(indexName = "locations")
 @Data
 @Builder
 @NoArgsConstructor

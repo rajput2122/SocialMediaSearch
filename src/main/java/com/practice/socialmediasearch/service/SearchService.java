@@ -64,11 +64,17 @@ public class SearchService {
     }
 
     private Page<SearchResult> searchPosts(String query, Pageable pageable) {
+        // caption is text (fuzziness applies); tags is keyword (exact term match via should clause)
         NativeQuery nativeQuery = NativeQuery.builder()
-                .withQuery(q -> q.multiMatch(mm -> mm
-                        .query(query)
-                        .fields("caption", "tags", "locationName", "userId")
-                        .fuzziness("AUTO")))
+                .withQuery(q -> q.bool(b -> b
+                        .should(s -> s.multiMatch(mm -> mm
+                                .query(query)
+                                .fields("caption")
+                                .fuzziness("AUTO")))
+                        .should(s -> s.term(t -> t
+                                .field("tags")
+                                .value(query)))
+                        .minimumShouldMatch("1")))
                 .withPageable(pageable)
                 .build();
 

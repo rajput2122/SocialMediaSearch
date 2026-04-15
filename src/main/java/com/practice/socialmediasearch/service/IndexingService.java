@@ -82,6 +82,7 @@ public class IndexingService {
                     .id(String.valueOf(page.getPageId()))
                     .pageName(page.getPageName())
                     .bio(page.getBio())
+                    .locationName(page.getLocation() != null ? page.getLocation().getDisplayName() : null)
                     .build();
             pageSearchRepository.save(document);
         } catch (Exception ex) {

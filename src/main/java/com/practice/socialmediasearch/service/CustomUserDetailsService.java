@@ -20,7 +20,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         UserCredential credential = userCredentialRepository.findByUser_Username(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-        return User.withUsername(credential.getUser().getUsername())
+        return User.withUsername(username)
                 .password(credential.getPassword())
                 .roles("USER")
                 .build();

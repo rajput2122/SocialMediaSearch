@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.*;
 
-@Document(indexName = "pages", createIndex = false)
+@Document(indexName = "pages")
 @Data
 @Builder
 @NoArgsConstructor
@@ -27,5 +27,8 @@ public class PageDocument {
 
     @Field(type = FieldType.Text)
     private String bio;
+
+    @Field(type = FieldType.Keyword)
+    private String locationName;
 }
 
