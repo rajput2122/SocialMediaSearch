@@ -1,0 +1,42 @@
+package com.practice.socialmediasearch.document;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.*;
+
+@Document(indexName = "users", createIndex = false)
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserDocument {
+
+    @Id
+    private String id;
+
+    @MultiField(
+            mainField = @Field(type = FieldType.Text),
+            otherFields = {
+                    @InnerField(suffix = "keyword", type = FieldType.Keyword)
+            }
+    )
+    private String name;
+
+    @MultiField(
+            mainField = @Field(type = FieldType.Text),
+            otherFields = {
+                    @InnerField(suffix = "keyword", type = FieldType.Keyword)
+            }
+    )
+    private String username;
+
+    @Field(type = FieldType.Text)
+    private String bio;
+
+    @Field(type = FieldType.Keyword)
+    private String locationName;
+}
+
