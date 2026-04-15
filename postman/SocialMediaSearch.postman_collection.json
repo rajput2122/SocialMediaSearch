@@ -1,0 +1,1640 @@
+{
+  "collection": {
+    "info": {
+      "_postman_id": "e2e7ca8d-266d-4428-934c-623885b2442a",
+      "name": "Social Media Search API",
+      "description": "End-to-end tests for the Social Media Search feature.\n\nCovers all 5 entity types (USER, POST, PAGE, TAG, LOCATION), pagination, validation, and auth guard.\n\nLocal dev setup:\n1. docker compose up -d\n2. ./mvnw spring-boot:run\n3. Seed data loads automatically on startup.\n\nTest credentials: atulk / password123",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+      "createdAt": "2026-04-15T13:47:34.000Z",
+      "updatedAt": "2026-04-15T13:47:34.000Z",
+      "lastUpdatedBy": "9986071",
+      "uid": "9986071-e2e7ca8d-266d-4428-934c-623885b2442a"
+    },
+    "item": [
+      {
+        "name": "[Happy Path] Search Users",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                "pm.test('ApiResponse wrapper present', () => {",
+                "    const json = pm.response.json();",
+                "    pm.expect(json.data).to.exist;",
+                "    pm.expect(json.error).to.be.null;",
+                "    pm.expect(json.meta.timestamp).to.exist;",
+                "});",
+                "pm.test('Returns at least one USER result', () => {",
+                "    const json = pm.response.json();",
+                "    pm.expect(json.data.totalElements).to.be.greaterThan(0);",
+                "    pm.expect(json.data.content[0].type).to.eql('USER');",
+                "    pm.expect(json.data.content[0].primaryText).to.include('Atul');",
+                "});"
+              ]
+            }
+          }
+        ],
+        "id": "a00dcbb0-643e-4a99-b761-fb8b0104b78a",
+        "request": {
+          "method": "GET",
+          "header": [],
+          "url": {
+            "raw": "{{baseUrl}}/api/v1/search?q=atul&type=USER&page=0&size=10",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "api",
+              "v1",
+              "search"
+            ],
+            "query": [
+              {
+                "key": "q",
+                "value": "atul",
+                "description": "Search query"
+              },
+              {
+                "key": "type",
+                "value": "USER"
+              },
+              {
+                "key": "page",
+                "value": "0"
+              },
+              {
+                "key": "size",
+                "value": "10"
+              }
+            ]
+          },
+          "description": "Search for users matching 'atul'. Expects Atul Kumar in results."
+        },
+        "response": [
+          {
+            "id": "5a807d5f-a169-4a67-a163-558d600cdc7f",
+            "name": "[Happy Path] Search Users",
+            "originalRequest": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "{{baseUrl}}/api/v1/search?q=atul&type=USER&page=0&size=10",
+                "host": [
+                  "{{baseUrl}}"
+                ],
+                "path": [
+                  "api",
+                  "v1",
+                  "search"
+                ],
+                "query": [
+                  {
+                    "key": "q",
+                    "value": "atul",
+                    "description": "Search query"
+                  },
+                  {
+                    "key": "type",
+                    "value": "USER"
+                  },
+                  {
+                    "key": "page",
+                    "value": "0"
+                  },
+                  {
+                    "key": "size",
+                    "value": "10"
+                  }
+                ]
+              }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": null,
+            "header": [
+              {
+                "key": "X-Content-Type-Options",
+                "value": "nosniff"
+              },
+              {
+                "key": "X-XSS-Protection",
+                "value": "0"
+              },
+              {
+                "key": "Cache-Control",
+                "value": "no-cache, no-store, max-age=0, must-revalidate"
+              },
+              {
+                "key": "Pragma",
+                "value": "no-cache"
+              },
+              {
+                "key": "Expires",
+                "value": "0"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Transfer-Encoding",
+                "value": "chunked"
+              },
+              {
+                "key": "Date",
+                "value": "Wed, 15 Apr 2026 13:47:50 GMT"
+              },
+              {
+                "key": "Keep-Alive",
+                "value": "timeout=60"
+              },
+              {
+                "key": "Connection",
+                "value": "keep-alive"
+              }
+            ],
+            "cookie": [],
+            "responseTime": null,
+            "body": "{\n    \"data\": {\n        \"content\": [\n            {\n                \"id\": \"1\",\n                \"type\": \"USER\",\n                \"primaryText\": \"Atul Kumar\",\n                \"secondaryText\": \"atulk\",\n                \"locationName\": \"Bengaluru\",\n                \"tags\": null\n            }\n        ],\n        \"pageable\": {\n            \"pageNumber\": 0,\n            \"pageSize\": 10,\n            \"sort\": {\n                \"empty\": true,\n                \"sorted\": false,\n                \"unsorted\": true\n            },\n            \"offset\": 0,\n            \"paged\": true,\n            \"unpaged\": false\n        },\n        \"last\": true,\n        \"totalPages\": 1,\n        \"totalElements\": 1,\n        \"first\": true,\n        \"size\": 10,\n        \"number\": 0,\n        \"sort\": {\n            \"empty\": true,\n            \"sorted\": false,\n            \"unsorted\": true\n        },\n        \"numberOfElements\": 1,\n        \"empty\": false\n    },\n    \"error\": null,\n    \"meta\": {\n        \"timestamp\": \"2026-04-15T19:17:50.196151\"\n    }\n}",
+            "createdAt": "2026-04-15T14:14:41.000Z",
+            "updatedAt": "2026-04-15T14:14:41.000Z",
+            "uid": "9986071-5a807d5f-a169-4a67-a163-558d600cdc7f"
+          }
+        ],
+        "createdAt": "2026-04-15T13:47:34.000Z",
+        "updatedAt": "2026-04-15T14:14:41.000Z",
+        "uid": "9986071-a00dcbb0-643e-4a99-b761-fb8b0104b78a"
+      },
+      {
+        "name": "[Happy Path] Search Posts",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                "pm.test('Returns POST results with tags', () => {",
+                "    const json = pm.response.json();",
+                "    pm.expect(json.data.totalElements).to.be.greaterThan(0);",
+                "    const first = json.data.content[0];",
+                "    pm.expect(first.type).to.eql('POST');",
+                "    pm.expect(first.primaryText).to.be.a('string');",
+                "    pm.expect(first.tags).to.be.an('array');",
+                "});"
+              ]
+            }
+          }
+        ],
+        "id": "ee03a60f-2253-4a40-a4cb-dc8e74fe50c3",
+        "request": {
+          "method": "GET",
+          "header": [],
+          "url": {
+            "raw": "{{baseUrl}}/api/v1/search?q=spring&type=POST&page=0&size=10",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "api",
+              "v1",
+              "search"
+            ],
+            "query": [
+              {
+                "key": "q",
+                "value": "spring"
+              },
+              {
+                "key": "type",
+                "value": "POST"
+              },
+              {
+                "key": "page",
+                "value": "0"
+              },
+              {
+                "key": "size",
+                "value": "10"
+              }
+            ]
+          },
+          "description": "Search for posts matching 'spring'. Both seeded posts mention Spring in caption."
+        },
+        "response": [
+          {
+            "id": "08c22aa5-d997-43a9-b262-d5f5178864dc",
+            "name": "[Happy Path] Search Posts",
+            "originalRequest": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "{{baseUrl}}/api/v1/search?q=spring&type=POST&page=0&size=10",
+                "host": [
+                  "{{baseUrl}}"
+                ],
+                "path": [
+                  "api",
+                  "v1",
+                  "search"
+                ],
+                "query": [
+                  {
+                    "key": "q",
+                    "value": "spring"
+                  },
+                  {
+                    "key": "type",
+                    "value": "POST"
+                  },
+                  {
+                    "key": "page",
+                    "value": "0"
+                  },
+                  {
+                    "key": "size",
+                    "value": "10"
+                  }
+                ]
+              }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": null,
+            "header": [
+              {
+                "key": "X-Content-Type-Options",
+                "value": "nosniff"
+              },
+              {
+                "key": "X-XSS-Protection",
+                "value": "0"
+              },
+              {
+                "key": "Cache-Control",
+                "value": "no-cache, no-store, max-age=0, must-revalidate"
+              },
+              {
+                "key": "Pragma",
+                "value": "no-cache"
+              },
+              {
+                "key": "Expires",
+                "value": "0"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Transfer-Encoding",
+                "value": "chunked"
+              },
+              {
+                "key": "Date",
+                "value": "Wed, 15 Apr 2026 13:48:09 GMT"
+              },
+              {
+                "key": "Keep-Alive",
+                "value": "timeout=60"
+              },
+              {
+                "key": "Connection",
+                "value": "keep-alive"
+              }
+            ],
+            "cookie": [],
+            "responseTime": null,
+            "body": "{\n    \"data\": {\n        \"content\": [\n            {\n                \"id\": \"1\",\n                \"type\": \"POST\",\n                \"primaryText\": \"Learning Spring Boot with microservices architecture\",\n                \"secondaryText\": \"1\",\n                \"locationName\": \"Bengaluru\",\n                \"tags\": [\n                    \"java\",\n                    \"spring\"\n                ]\n            },\n            {\n                \"id\": \"2\",\n                \"type\": \"POST\",\n                \"primaryText\": \"Exploring cloud native applications with Spring\",\n                \"secondaryText\": \"2\",\n                \"locationName\": \"Mumbai\",\n                \"tags\": [\n                    \"spring\",\n                    \"microservices\"\n                ]\n            }\n        ],\n        \"pageable\": {\n            \"pageNumber\": 0,\n            \"pageSize\": 10,\n            \"sort\": {\n                \"empty\": true,\n                \"sorted\": false,\n                \"unsorted\": true\n            },\n            \"offset\": 0,\n            \"paged\": true,\n            \"unpaged\": false\n        },\n        \"last\": true,\n        \"totalPages\": 1,\n        \"totalElements\": 2,\n        \"first\": true,\n        \"size\": 10,\n        \"number\": 0,\n        \"sort\": {\n            \"empty\": true,\n            \"sorted\": false,\n            \"unsorted\": true\n        },\n        \"numberOfElements\": 2,\n        \"empty\": false\n    },\n    \"error\": null,\n    \"meta\": {\n        \"timestamp\": \"2026-04-15T19:18:09.017469\"\n    }\n}",
+            "createdAt": "2026-04-15T14:14:46.000Z",
+            "updatedAt": "2026-04-15T14:14:46.000Z",
+            "uid": "9986071-08c22aa5-d997-43a9-b262-d5f5178864dc"
+          }
+        ],
+        "createdAt": "2026-04-15T13:47:34.000Z",
+        "updatedAt": "2026-04-15T14:14:46.000Z",
+        "uid": "9986071-ee03a60f-2253-4a40-a4cb-dc8e74fe50c3"
+      },
+      {
+        "name": "[Happy Path] Search Pages",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                "pm.test('Returns PAGE result', () => {",
+                "    const json = pm.response.json();",
+                "    pm.expect(json.data.totalElements).to.be.greaterThan(0);",
+                "    pm.expect(json.data.content[0].type).to.eql('PAGE');",
+                "    pm.expect(json.data.content[0].primaryText).to.include('Java');",
+                "});"
+              ]
+            }
+          }
+        ],
+        "id": "dbdd510a-187c-4b9b-a186-39d8157395fe",
+        "request": {
+          "method": "GET",
+          "header": [],
+          "url": {
+            "raw": "{{baseUrl}}/api/v1/search?q=java&type=PAGE&page=0&size=10",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "api",
+              "v1",
+              "search"
+            ],
+            "query": [
+              {
+                "key": "q",
+                "value": "java"
+              },
+              {
+                "key": "type",
+                "value": "PAGE"
+              },
+              {
+                "key": "page",
+                "value": "0"
+              },
+              {
+                "key": "size",
+                "value": "10"
+              }
+            ]
+          },
+          "description": "Search for pages matching 'java'. Expects 'Java Community' page."
+        },
+        "response": [
+          {
+            "id": "3e25da39-08ce-4ab4-8970-5702c9377fa1",
+            "name": "[Happy Path] Search Pages",
+            "originalRequest": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "{{baseUrl}}/api/v1/search?q=java&type=PAGE&page=0&size=10",
+                "host": [
+                  "{{baseUrl}}"
+                ],
+                "path": [
+                  "api",
+                  "v1",
+                  "search"
+                ],
+                "query": [
+                  {
+                    "key": "q",
+                    "value": "java"
+                  },
+                  {
+                    "key": "type",
+                    "value": "PAGE"
+                  },
+                  {
+                    "key": "page",
+                    "value": "0"
+                  },
+                  {
+                    "key": "size",
+                    "value": "10"
+                  }
+                ]
+              }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": null,
+            "header": [
+              {
+                "key": "X-Content-Type-Options",
+                "value": "nosniff"
+              },
+              {
+                "key": "X-XSS-Protection",
+                "value": "0"
+              },
+              {
+                "key": "Cache-Control",
+                "value": "no-cache, no-store, max-age=0, must-revalidate"
+              },
+              {
+                "key": "Pragma",
+                "value": "no-cache"
+              },
+              {
+                "key": "Expires",
+                "value": "0"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Transfer-Encoding",
+                "value": "chunked"
+              },
+              {
+                "key": "Date",
+                "value": "Wed, 15 Apr 2026 13:48:15 GMT"
+              },
+              {
+                "key": "Keep-Alive",
+                "value": "timeout=60"
+              },
+              {
+                "key": "Connection",
+                "value": "keep-alive"
+              }
+            ],
+            "cookie": [],
+            "responseTime": null,
+            "body": "{\n    \"data\": {\n        \"content\": [\n            {\n                \"id\": \"1\",\n                \"type\": \"PAGE\",\n                \"primaryText\": \"Java Community\",\n                \"secondaryText\": \"A community for Java developers to connect and share\",\n                \"locationName\": null,\n                \"tags\": null\n            }\n        ],\n        \"pageable\": {\n            \"pageNumber\": 0,\n            \"pageSize\": 10,\n            \"sort\": {\n                \"empty\": true,\n                \"sorted\": false,\n                \"unsorted\": true\n            },\n            \"offset\": 0,\n            \"paged\": true,\n            \"unpaged\": false\n        },\n        \"last\": true,\n        \"totalPages\": 1,\n        \"totalElements\": 1,\n        \"first\": true,\n        \"size\": 10,\n        \"number\": 0,\n        \"sort\": {\n            \"empty\": true,\n            \"sorted\": false,\n            \"unsorted\": true\n        },\n        \"numberOfElements\": 1,\n        \"empty\": false\n    },\n    \"error\": null,\n    \"meta\": {\n        \"timestamp\": \"2026-04-15T19:18:15.243053\"\n    }\n}",
+            "createdAt": "2026-04-15T14:14:50.000Z",
+            "updatedAt": "2026-04-15T14:14:50.000Z",
+            "uid": "9986071-3e25da39-08ce-4ab4-8970-5702c9377fa1"
+          }
+        ],
+        "createdAt": "2026-04-15T13:47:34.000Z",
+        "updatedAt": "2026-04-15T14:14:50.000Z",
+        "uid": "9986071-dbdd510a-187c-4b9b-a186-39d8157395fe"
+      },
+      {
+        "name": "[Happy Path] Search Tags",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                "pm.test('Returns TAG result', () => {",
+                "    const json = pm.response.json();",
+                "    pm.expect(json.data.totalElements).to.be.greaterThan(0);",
+                "    pm.expect(json.data.content[0].type).to.eql('TAG');",
+                "    pm.expect(json.data.content[0].primaryText).to.eql('spring');",
+                "});"
+              ]
+            }
+          }
+        ],
+        "id": "5fe76ad3-c650-4fbe-aa8e-294863f8d01b",
+        "request": {
+          "method": "GET",
+          "header": [],
+          "url": {
+            "raw": "{{baseUrl}}/api/v1/search?q=spring&type=TAG&page=0&size=10",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "api",
+              "v1",
+              "search"
+            ],
+            "query": [
+              {
+                "key": "q",
+                "value": "spring"
+              },
+              {
+                "key": "type",
+                "value": "TAG"
+              },
+              {
+                "key": "page",
+                "value": "0"
+              },
+              {
+                "key": "size",
+                "value": "10"
+              }
+            ]
+          },
+          "description": "Search for tags matching 'spring'. Expects the 'spring' tag."
+        },
+        "response": [
+          {
+            "id": "ecadc4d3-0ba5-45b4-9019-e69a9283806c",
+            "name": "[Happy Path] Search Tags",
+            "originalRequest": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "{{baseUrl}}/api/v1/search?q=spring&type=TAG&page=0&size=10",
+                "host": [
+                  "{{baseUrl}}"
+                ],
+                "path": [
+                  "api",
+                  "v1",
+                  "search"
+                ],
+                "query": [
+                  {
+                    "key": "q",
+                    "value": "spring"
+                  },
+                  {
+                    "key": "type",
+                    "value": "TAG"
+                  },
+                  {
+                    "key": "page",
+                    "value": "0"
+                  },
+                  {
+                    "key": "size",
+                    "value": "10"
+                  }
+                ]
+              }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": null,
+            "header": [
+              {
+                "key": "X-Content-Type-Options",
+                "value": "nosniff"
+              },
+              {
+                "key": "X-XSS-Protection",
+                "value": "0"
+              },
+              {
+                "key": "Cache-Control",
+                "value": "no-cache, no-store, max-age=0, must-revalidate"
+              },
+              {
+                "key": "Pragma",
+                "value": "no-cache"
+              },
+              {
+                "key": "Expires",
+                "value": "0"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Transfer-Encoding",
+                "value": "chunked"
+              },
+              {
+                "key": "Date",
+                "value": "Wed, 15 Apr 2026 13:48:20 GMT"
+              },
+              {
+                "key": "Keep-Alive",
+                "value": "timeout=60"
+              },
+              {
+                "key": "Connection",
+                "value": "keep-alive"
+              }
+            ],
+            "cookie": [],
+            "responseTime": null,
+            "body": "{\n    \"data\": {\n        \"content\": [\n            {\n                \"id\": \"2\",\n                \"type\": \"TAG\",\n                \"primaryText\": \"spring\",\n                \"secondaryText\": null,\n                \"locationName\": null,\n                \"tags\": null\n            }\n        ],\n        \"pageable\": {\n            \"pageNumber\": 0,\n            \"pageSize\": 10,\n            \"sort\": {\n                \"empty\": true,\n                \"sorted\": false,\n                \"unsorted\": true\n            },\n            \"offset\": 0,\n            \"paged\": true,\n            \"unpaged\": false\n        },\n        \"last\": true,\n        \"totalPages\": 1,\n        \"totalElements\": 1,\n        \"first\": true,\n        \"size\": 10,\n        \"number\": 0,\n        \"sort\": {\n            \"empty\": true,\n            \"sorted\": false,\n            \"unsorted\": true\n        },\n        \"numberOfElements\": 1,\n        \"empty\": false\n    },\n    \"error\": null,\n    \"meta\": {\n        \"timestamp\": \"2026-04-15T19:18:20.655042\"\n    }\n}",
+            "createdAt": "2026-04-15T14:14:55.000Z",
+            "updatedAt": "2026-04-15T14:14:55.000Z",
+            "uid": "9986071-ecadc4d3-0ba5-45b4-9019-e69a9283806c"
+          }
+        ],
+        "createdAt": "2026-04-15T13:47:34.000Z",
+        "updatedAt": "2026-04-15T14:14:55.000Z",
+        "uid": "9986071-5fe76ad3-c650-4fbe-aa8e-294863f8d01b"
+      },
+      {
+        "name": "[Happy Path] Search Locations",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                "pm.test('Returns LOCATION result', () => {",
+                "    const json = pm.response.json();",
+                "    pm.expect(json.data.totalElements).to.be.greaterThan(0);",
+                "    pm.expect(json.data.content[0].type).to.eql('LOCATION');",
+                "    pm.expect(json.data.content[0].primaryText).to.eql('Bengaluru');",
+                "});"
+              ]
+            }
+          }
+        ],
+        "id": "95e214e2-0bb4-44a6-8985-67a191d10133",
+        "request": {
+          "method": "GET",
+          "header": [],
+          "url": {
+            "raw": "{{baseUrl}}/api/v1/search?q=bengaluru&type=LOCATION&page=0&size=10",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "api",
+              "v1",
+              "search"
+            ],
+            "query": [
+              {
+                "key": "q",
+                "value": "bengaluru"
+              },
+              {
+                "key": "type",
+                "value": "LOCATION"
+              },
+              {
+                "key": "page",
+                "value": "0"
+              },
+              {
+                "key": "size",
+                "value": "10"
+              }
+            ]
+          },
+          "description": "Search for locations matching 'bengaluru'. Expects the 'Bengaluru' location."
+        },
+        "response": [
+          {
+            "id": "2364b256-08b5-4abf-8383-655c51f04dcb",
+            "name": "[Happy Path] Search Locations",
+            "originalRequest": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "{{baseUrl}}/api/v1/search?q=bengaluru&type=LOCATION&page=0&size=10",
+                "host": [
+                  "{{baseUrl}}"
+                ],
+                "path": [
+                  "api",
+                  "v1",
+                  "search"
+                ],
+                "query": [
+                  {
+                    "key": "q",
+                    "value": "bengaluru"
+                  },
+                  {
+                    "key": "type",
+                    "value": "LOCATION"
+                  },
+                  {
+                    "key": "page",
+                    "value": "0"
+                  },
+                  {
+                    "key": "size",
+                    "value": "10"
+                  }
+                ]
+              }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": null,
+            "header": [
+              {
+                "key": "X-Content-Type-Options",
+                "value": "nosniff"
+              },
+              {
+                "key": "X-XSS-Protection",
+                "value": "0"
+              },
+              {
+                "key": "Cache-Control",
+                "value": "no-cache, no-store, max-age=0, must-revalidate"
+              },
+              {
+                "key": "Pragma",
+                "value": "no-cache"
+              },
+              {
+                "key": "Expires",
+                "value": "0"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Transfer-Encoding",
+                "value": "chunked"
+              },
+              {
+                "key": "Date",
+                "value": "Wed, 15 Apr 2026 13:48:26 GMT"
+              },
+              {
+                "key": "Keep-Alive",
+                "value": "timeout=60"
+              },
+              {
+                "key": "Connection",
+                "value": "keep-alive"
+              }
+            ],
+            "cookie": [],
+            "responseTime": null,
+            "body": "{\n    \"data\": {\n        \"content\": [\n            {\n                \"id\": \"1\",\n                \"type\": \"LOCATION\",\n                \"primaryText\": \"Bengaluru\",\n                \"secondaryText\": null,\n                \"locationName\": null,\n                \"tags\": null\n            }\n        ],\n        \"pageable\": {\n            \"pageNumber\": 0,\n            \"pageSize\": 10,\n            \"sort\": {\n                \"empty\": true,\n                \"sorted\": false,\n                \"unsorted\": true\n            },\n            \"offset\": 0,\n            \"paged\": true,\n            \"unpaged\": false\n        },\n        \"last\": true,\n        \"totalPages\": 1,\n        \"totalElements\": 1,\n        \"first\": true,\n        \"size\": 10,\n        \"number\": 0,\n        \"sort\": {\n            \"empty\": true,\n            \"sorted\": false,\n            \"unsorted\": true\n        },\n        \"numberOfElements\": 1,\n        \"empty\": false\n    },\n    \"error\": null,\n    \"meta\": {\n        \"timestamp\": \"2026-04-15T19:18:26.240483\"\n    }\n}",
+            "createdAt": "2026-04-15T14:14:59.000Z",
+            "updatedAt": "2026-04-15T14:14:59.000Z",
+            "uid": "9986071-2364b256-08b5-4abf-8383-655c51f04dcb"
+          }
+        ],
+        "createdAt": "2026-04-15T13:47:34.000Z",
+        "updatedAt": "2026-04-15T14:14:59.000Z",
+        "uid": "9986071-95e214e2-0bb4-44a6-8985-67a191d10133"
+      },
+      {
+        "name": "[Pagination] Posts \u2014 Page 0 size 1",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                "pm.test('Pagination metadata is correct', () => {",
+                "    const page = pm.response.json().data;",
+                "    pm.expect(page.content).to.have.lengthOf(1);",
+                "    pm.expect(page.totalElements).to.eql(2);",
+                "    pm.expect(page.totalPages).to.eql(2);",
+                "    pm.expect(page.first).to.be.true;",
+                "    pm.expect(page.last).to.be.false;",
+                "});"
+              ]
+            }
+          }
+        ],
+        "id": "a7d757b2-5325-4f02-94d8-3e17f0691b75",
+        "request": {
+          "method": "GET",
+          "header": [],
+          "url": {
+            "raw": "{{baseUrl}}/api/v1/search?q=spring&type=POST&page=0&size=1",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "api",
+              "v1",
+              "search"
+            ],
+            "query": [
+              {
+                "key": "q",
+                "value": "spring"
+              },
+              {
+                "key": "type",
+                "value": "POST"
+              },
+              {
+                "key": "page",
+                "value": "0"
+              },
+              {
+                "key": "size",
+                "value": "1"
+              }
+            ]
+          },
+          "description": "First page with size=1. Expects totalElements=2, totalPages=2, first=true, last=false."
+        },
+        "response": [
+          {
+            "id": "b3c0f587-cddd-48c0-9ee9-d5134b49086b",
+            "name": "[Pagination] Posts \u2014 Page 0 size 1",
+            "originalRequest": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "{{baseUrl}}/api/v1/search?q=spring&type=POST&page=0&size=1",
+                "host": [
+                  "{{baseUrl}}"
+                ],
+                "path": [
+                  "api",
+                  "v1",
+                  "search"
+                ],
+                "query": [
+                  {
+                    "key": "q",
+                    "value": "spring"
+                  },
+                  {
+                    "key": "type",
+                    "value": "POST"
+                  },
+                  {
+                    "key": "page",
+                    "value": "0"
+                  },
+                  {
+                    "key": "size",
+                    "value": "1"
+                  }
+                ]
+              }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": null,
+            "header": [
+              {
+                "key": "X-Content-Type-Options",
+                "value": "nosniff"
+              },
+              {
+                "key": "X-XSS-Protection",
+                "value": "0"
+              },
+              {
+                "key": "Cache-Control",
+                "value": "no-cache, no-store, max-age=0, must-revalidate"
+              },
+              {
+                "key": "Pragma",
+                "value": "no-cache"
+              },
+              {
+                "key": "Expires",
+                "value": "0"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Transfer-Encoding",
+                "value": "chunked"
+              },
+              {
+                "key": "Date",
+                "value": "Wed, 15 Apr 2026 13:48:32 GMT"
+              },
+              {
+                "key": "Keep-Alive",
+                "value": "timeout=60"
+              },
+              {
+                "key": "Connection",
+                "value": "keep-alive"
+              }
+            ],
+            "cookie": [],
+            "responseTime": null,
+            "body": "{\n    \"data\": {\n        \"content\": [\n            {\n                \"id\": \"1\",\n                \"type\": \"POST\",\n                \"primaryText\": \"Learning Spring Boot with microservices architecture\",\n                \"secondaryText\": \"1\",\n                \"locationName\": \"Bengaluru\",\n                \"tags\": [\n                    \"java\",\n                    \"spring\"\n                ]\n            }\n        ],\n        \"pageable\": {\n            \"pageNumber\": 0,\n            \"pageSize\": 1,\n            \"sort\": {\n                \"empty\": true,\n                \"sorted\": false,\n                \"unsorted\": true\n            },\n            \"offset\": 0,\n            \"paged\": true,\n            \"unpaged\": false\n        },\n        \"last\": false,\n        \"totalPages\": 2,\n        \"totalElements\": 2,\n        \"first\": true,\n        \"size\": 1,\n        \"number\": 0,\n        \"sort\": {\n            \"empty\": true,\n            \"sorted\": false,\n            \"unsorted\": true\n        },\n        \"numberOfElements\": 1,\n        \"empty\": false\n    },\n    \"error\": null,\n    \"meta\": {\n        \"timestamp\": \"2026-04-15T19:18:32.495747\"\n    }\n}",
+            "createdAt": "2026-04-15T14:15:03.000Z",
+            "updatedAt": "2026-04-15T14:15:03.000Z",
+            "uid": "9986071-b3c0f587-cddd-48c0-9ee9-d5134b49086b"
+          }
+        ],
+        "createdAt": "2026-04-15T13:47:34.000Z",
+        "updatedAt": "2026-04-15T14:15:03.000Z",
+        "uid": "9986071-a7d757b2-5325-4f02-94d8-3e17f0691b75"
+      },
+      {
+        "name": "[Pagination] Posts \u2014 Page 1 size 1",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                "pm.test('Second page is last page', () => {",
+                "    const page = pm.response.json().data;",
+                "    pm.expect(page.content).to.have.lengthOf(1);",
+                "    pm.expect(page.first).to.be.false;",
+                "    pm.expect(page.last).to.be.true;",
+                "});"
+              ]
+            }
+          }
+        ],
+        "id": "b34a6d99-4e0c-4b67-b516-73f1c04ee4ef",
+        "request": {
+          "method": "GET",
+          "header": [],
+          "url": {
+            "raw": "{{baseUrl}}/api/v1/search?q=spring&type=POST&page=1&size=1",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "api",
+              "v1",
+              "search"
+            ],
+            "query": [
+              {
+                "key": "q",
+                "value": "spring"
+              },
+              {
+                "key": "type",
+                "value": "POST"
+              },
+              {
+                "key": "page",
+                "value": "1"
+              },
+              {
+                "key": "size",
+                "value": "1"
+              }
+            ]
+          },
+          "description": "Second page with size=1. Should be the last page."
+        },
+        "response": [
+          {
+            "id": "c571bddc-73b5-4c7b-8379-f0121aa8e9a2",
+            "name": "[Pagination] Posts \u2014 Page 1 size 1",
+            "originalRequest": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "{{baseUrl}}/api/v1/search?q=spring&type=POST&page=1&size=1",
+                "host": [
+                  "{{baseUrl}}"
+                ],
+                "path": [
+                  "api",
+                  "v1",
+                  "search"
+                ],
+                "query": [
+                  {
+                    "key": "q",
+                    "value": "spring"
+                  },
+                  {
+                    "key": "type",
+                    "value": "POST"
+                  },
+                  {
+                    "key": "page",
+                    "value": "1"
+                  },
+                  {
+                    "key": "size",
+                    "value": "1"
+                  }
+                ]
+              }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": null,
+            "header": [
+              {
+                "key": "X-Content-Type-Options",
+                "value": "nosniff"
+              },
+              {
+                "key": "X-XSS-Protection",
+                "value": "0"
+              },
+              {
+                "key": "Cache-Control",
+                "value": "no-cache, no-store, max-age=0, must-revalidate"
+              },
+              {
+                "key": "Pragma",
+                "value": "no-cache"
+              },
+              {
+                "key": "Expires",
+                "value": "0"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Transfer-Encoding",
+                "value": "chunked"
+              },
+              {
+                "key": "Date",
+                "value": "Wed, 15 Apr 2026 13:48:37 GMT"
+              },
+              {
+                "key": "Keep-Alive",
+                "value": "timeout=60"
+              },
+              {
+                "key": "Connection",
+                "value": "keep-alive"
+              }
+            ],
+            "cookie": [],
+            "responseTime": null,
+            "body": "{\n    \"data\": {\n        \"content\": [\n            {\n                \"id\": \"2\",\n                \"type\": \"POST\",\n                \"primaryText\": \"Exploring cloud native applications with Spring\",\n                \"secondaryText\": \"2\",\n                \"locationName\": \"Mumbai\",\n                \"tags\": [\n                    \"spring\",\n                    \"microservices\"\n                ]\n            }\n        ],\n        \"pageable\": {\n            \"pageNumber\": 1,\n            \"pageSize\": 1,\n            \"sort\": {\n                \"empty\": true,\n                \"sorted\": false,\n                \"unsorted\": true\n            },\n            \"offset\": 1,\n            \"paged\": true,\n            \"unpaged\": false\n        },\n        \"last\": true,\n        \"totalPages\": 2,\n        \"totalElements\": 2,\n        \"first\": false,\n        \"size\": 1,\n        \"number\": 1,\n        \"sort\": {\n            \"empty\": true,\n            \"sorted\": false,\n            \"unsorted\": true\n        },\n        \"numberOfElements\": 1,\n        \"empty\": false\n    },\n    \"error\": null,\n    \"meta\": {\n        \"timestamp\": \"2026-04-15T19:18:37.221965\"\n    }\n}",
+            "createdAt": "2026-04-15T14:15:07.000Z",
+            "updatedAt": "2026-04-15T14:15:07.000Z",
+            "uid": "9986071-c571bddc-73b5-4c7b-8379-f0121aa8e9a2"
+          }
+        ],
+        "createdAt": "2026-04-15T13:47:34.000Z",
+        "updatedAt": "2026-04-15T14:15:07.000Z",
+        "uid": "9986071-b34a6d99-4e0c-4b67-b516-73f1c04ee4ef"
+      },
+      {
+        "name": "[Validation] Blank query \u2014 expect 400",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Status is 400', () => pm.response.to.have.status(400));",
+                "pm.test('VALIDATION_ERROR with field error', () => {",
+                "    const json = pm.response.json();",
+                "    pm.expect(json.data).to.be.null;",
+                "    pm.expect(json.error.code).to.eql('VALIDATION_ERROR');",
+                "    pm.expect(json.error.fieldErrors[0].field).to.eql('query');",
+                "    pm.expect(json.error.fieldErrors[0].message).to.eql('q is required');",
+                "});"
+              ]
+            }
+          }
+        ],
+        "id": "a056aab2-33bd-4a73-9036-18e4ae3e33c4",
+        "request": {
+          "method": "GET",
+          "header": [],
+          "url": {
+            "raw": "{{baseUrl}}/api/v1/search?q= &type=USER",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "api",
+              "v1",
+              "search"
+            ],
+            "query": [
+              {
+                "key": "q",
+                "value": " ",
+                "description": "Intentionally blank \u2014 triggers @NotBlank"
+              },
+              {
+                "key": "type",
+                "value": "USER"
+              }
+            ]
+          },
+          "description": "Blank q param should return 400 VALIDATION_ERROR with field error on 'query'."
+        },
+        "response": [
+          {
+            "id": "c90f00b6-9788-46c7-bd62-8bceabc1806a",
+            "name": "[Validation] Blank query \u2014 expect 400",
+            "originalRequest": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "{{baseUrl}}/api/v1/search?q= &type=USER",
+                "host": [
+                  "{{baseUrl}}"
+                ],
+                "path": [
+                  "api",
+                  "v1",
+                  "search"
+                ],
+                "query": [
+                  {
+                    "key": "q",
+                    "value": " ",
+                    "description": "Intentionally blank \u2014 triggers @NotBlank"
+                  },
+                  {
+                    "key": "type",
+                    "value": "USER"
+                  }
+                ]
+              }
+            },
+            "status": "Bad Request",
+            "code": 400,
+            "_postman_previewlanguage": null,
+            "header": [
+              {
+                "key": "X-Content-Type-Options",
+                "value": "nosniff"
+              },
+              {
+                "key": "X-XSS-Protection",
+                "value": "0"
+              },
+              {
+                "key": "Cache-Control",
+                "value": "no-cache, no-store, max-age=0, must-revalidate"
+              },
+              {
+                "key": "Pragma",
+                "value": "no-cache"
+              },
+              {
+                "key": "Expires",
+                "value": "0"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Transfer-Encoding",
+                "value": "chunked"
+              },
+              {
+                "key": "Date",
+                "value": "Wed, 15 Apr 2026 13:48:42 GMT"
+              },
+              {
+                "key": "Connection",
+                "value": "close"
+              }
+            ],
+            "cookie": [],
+            "responseTime": null,
+            "body": "{\n    \"data\": null,\n    \"error\": {\n        \"code\": \"VALIDATION_ERROR\",\n        \"message\": \"Validation failed\",\n        \"fieldErrors\": [\n            {\n                \"field\": \"query\",\n                \"message\": \"q is required\"\n            }\n        ]\n    },\n    \"meta\": {\n        \"timestamp\": \"2026-04-15T19:18:42.321607\"\n    }\n}",
+            "createdAt": "2026-04-15T14:15:11.000Z",
+            "updatedAt": "2026-04-15T14:15:11.000Z",
+            "uid": "9986071-c90f00b6-9788-46c7-bd62-8bceabc1806a"
+          }
+        ],
+        "createdAt": "2026-04-15T13:47:34.000Z",
+        "updatedAt": "2026-04-15T14:15:11.000Z",
+        "uid": "9986071-a056aab2-33bd-4a73-9036-18e4ae3e33c4"
+      },
+      {
+        "name": "[Validation] Invalid type \u2014 expect 400",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Status is 400', () => pm.response.to.have.status(400));",
+                "pm.test('BAD_REQUEST with invalid value message', () => {",
+                "    const json = pm.response.json();",
+                "    pm.expect(json.error.code).to.eql('BAD_REQUEST');",
+                "    pm.expect(json.error.message).to.include('WRONG');",
+                "});"
+              ]
+            }
+          }
+        ],
+        "id": "5523645d-94db-4cd0-bc25-9892f4bf3e1e",
+        "request": {
+          "method": "GET",
+          "header": [],
+          "url": {
+            "raw": "{{baseUrl}}/api/v1/search?q=atul&type=WRONG",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "api",
+              "v1",
+              "search"
+            ],
+            "query": [
+              {
+                "key": "q",
+                "value": "atul"
+              },
+              {
+                "key": "type",
+                "value": "WRONG",
+                "description": "Not a valid SearchType enum value"
+              }
+            ]
+          },
+          "description": "Invalid type enum value should return 400 BAD_REQUEST."
+        },
+        "response": [
+          {
+            "id": "bd4db7da-24b4-4116-bc9f-af1748ab1df7",
+            "name": "[Validation] Invalid type \u2014 expect 400",
+            "originalRequest": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "{{baseUrl}}/api/v1/search?q=atul&type=WRONG",
+                "host": [
+                  "{{baseUrl}}"
+                ],
+                "path": [
+                  "api",
+                  "v1",
+                  "search"
+                ],
+                "query": [
+                  {
+                    "key": "q",
+                    "value": "atul"
+                  },
+                  {
+                    "key": "type",
+                    "value": "WRONG",
+                    "description": "Not a valid SearchType enum value"
+                  }
+                ]
+              }
+            },
+            "status": "Bad Request",
+            "code": 400,
+            "_postman_previewlanguage": null,
+            "header": [
+              {
+                "key": "X-Content-Type-Options",
+                "value": "nosniff"
+              },
+              {
+                "key": "X-XSS-Protection",
+                "value": "0"
+              },
+              {
+                "key": "Cache-Control",
+                "value": "no-cache, no-store, max-age=0, must-revalidate"
+              },
+              {
+                "key": "Pragma",
+                "value": "no-cache"
+              },
+              {
+                "key": "Expires",
+                "value": "0"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Transfer-Encoding",
+                "value": "chunked"
+              },
+              {
+                "key": "Date",
+                "value": "Wed, 15 Apr 2026 13:48:46 GMT"
+              },
+              {
+                "key": "Connection",
+                "value": "close"
+              }
+            ],
+            "cookie": [],
+            "responseTime": null,
+            "body": "{\n    \"data\": null,\n    \"error\": {\n        \"code\": \"BAD_REQUEST\",\n        \"message\": \"Invalid value 'WRONG' for parameter 'type'\",\n        \"fieldErrors\": null\n    },\n    \"meta\": {\n        \"timestamp\": \"2026-04-15T19:18:46.871388\"\n    }\n}",
+            "createdAt": "2026-04-15T14:15:15.000Z",
+            "updatedAt": "2026-04-15T14:15:15.000Z",
+            "uid": "9986071-bd4db7da-24b4-4116-bc9f-af1748ab1df7"
+          }
+        ],
+        "createdAt": "2026-04-15T13:47:34.000Z",
+        "updatedAt": "2026-04-15T14:15:16.000Z",
+        "uid": "9986071-5523645d-94db-4cd0-bc25-9892f4bf3e1e"
+      },
+      {
+        "name": "[Auth] No credentials \u2014 expect 401",
+        "event": [
+          {
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Status is 401', () => pm.response.to.have.status(401));",
+                "pm.test('UNAUTHORIZED error body present', () => {",
+                "    const json = pm.response.json();",
+                "    pm.expect(json.data).to.be.null;",
+                "    pm.expect(json.error.code).to.eql('UNAUTHORIZED');",
+                "    pm.expect(json.error.message).to.eql('Authentication required');",
+                "    pm.expect(json.meta.timestamp).to.exist;",
+                "});"
+              ]
+            },
+            "listen": "test"
+          }
+        ],
+        "id": "7949f82f-9fe7-4c6e-a429-43867554a3c2",
+        "request": {
+          "auth": {
+            "type": "noauth"
+          },
+          "method": "GET",
+          "header": [],
+          "url": {
+            "raw": "{{baseUrl}}/api/v1/search?q=atul&type=USER",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "api",
+              "v1",
+              "search"
+            ],
+            "query": [
+              {
+                "key": "q",
+                "value": "atul"
+              },
+              {
+                "key": "type",
+                "value": "USER"
+              }
+            ]
+          },
+          "description": "Overrides collection-level auth with noauth. Should return 401 Unauthorized."
+        },
+        "response": [
+          {
+            "id": "f5a31ac0-485e-4b52-976f-c69caad9d717",
+            "name": "[Auth] No credentials \u2014 expect 401",
+            "originalRequest": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "{{baseUrl}}/api/v1/search?q=atul&type=USER",
+                "host": [
+                  "{{baseUrl}}"
+                ],
+                "path": [
+                  "api",
+                  "v1",
+                  "search"
+                ],
+                "query": [
+                  {
+                    "key": "q",
+                    "value": "atul"
+                  },
+                  {
+                    "key": "type",
+                    "value": "USER"
+                  }
+                ]
+              }
+            },
+            "status": "Unauthorized",
+            "code": 401,
+            "_postman_previewlanguage": null,
+            "header": [
+              {
+                "key": "X-Content-Type-Options",
+                "value": "nosniff"
+              },
+              {
+                "key": "X-XSS-Protection",
+                "value": "0"
+              },
+              {
+                "key": "Cache-Control",
+                "value": "no-cache, no-store, max-age=0, must-revalidate"
+              },
+              {
+                "key": "Pragma",
+                "value": "no-cache"
+              },
+              {
+                "key": "Expires",
+                "value": "0"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json;charset=ISO-8859-1"
+              },
+              {
+                "key": "Content-Length",
+                "value": "150"
+              },
+              {
+                "key": "Date",
+                "value": "Wed, 15 Apr 2026 13:52:24 GMT"
+              },
+              {
+                "key": "Keep-Alive",
+                "value": "timeout=60"
+              },
+              {
+                "key": "Connection",
+                "value": "keep-alive"
+              }
+            ],
+            "cookie": [],
+            "responseTime": null,
+            "body": "{\n    \"data\": null,\n    \"error\": {\n        \"code\": \"UNAUTHORIZED\",\n        \"message\": \"Authentication required\",\n        \"fieldErrors\": null\n    },\n    \"meta\": {\n        \"timestamp\": \"2026-04-15T19:22:24.642586\"\n    }\n}",
+            "createdAt": "2026-04-15T14:15:19.000Z",
+            "updatedAt": "2026-04-15T14:15:19.000Z",
+            "uid": "9986071-f5a31ac0-485e-4b52-976f-c69caad9d717"
+          }
+        ],
+        "createdAt": "2026-04-15T13:47:34.000Z",
+        "updatedAt": "2026-04-15T14:15:19.000Z",
+        "uid": "9986071-7949f82f-9fe7-4c6e-a429-43867554a3c2"
+      },
+      {
+        "name": "[Auth] Wrong password \u2014 expect 401",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Status is 401', () => pm.response.to.have.status(401));",
+                "pm.test('UNAUTHORIZED error body present', () => {",
+                "    const json = pm.response.json();",
+                "    pm.expect(json.data).to.be.null;",
+                "    pm.expect(json.error.code).to.eql('UNAUTHORIZED');",
+                "    pm.expect(json.error.message).to.eql('password incorrect');",
+                "    pm.expect(json.meta.timestamp).to.exist;",
+                "});"
+              ]
+            }
+          }
+        ],
+        "id": "bafb81af-58b4-494a-a9e3-83378658247c",
+        "request": {
+          "auth": {
+            "type": "basic",
+            "basic": [
+              {
+                "key": "username",
+                "value": "atulk",
+                "type": "string"
+              },
+              {
+                "key": "password",
+                "value": "wrongpass",
+                "type": "string"
+              }
+            ]
+          },
+          "method": "GET",
+          "header": [],
+          "url": {
+            "raw": "{{baseUrl}}/api/v1/search?q=atul&type=USER",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "api",
+              "v1",
+              "search"
+            ],
+            "query": [
+              {
+                "key": "q",
+                "value": "atul"
+              },
+              {
+                "key": "type",
+                "value": "USER"
+              }
+            ]
+          },
+          "description": "Correct username but wrong password. Should return 401."
+        },
+        "response": [
+          {
+            "id": "44199812-6f04-4ecf-95cb-cbbb22fcb258",
+            "name": "[Auth] Wrong password \u2014 expect 401",
+            "originalRequest": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "{{baseUrl}}/api/v1/search?q=atul&type=USER",
+                "host": [
+                  "{{baseUrl}}"
+                ],
+                "path": [
+                  "api",
+                  "v1",
+                  "search"
+                ],
+                "query": [
+                  {
+                    "key": "q",
+                    "value": "atul"
+                  },
+                  {
+                    "key": "type",
+                    "value": "USER"
+                  }
+                ]
+              }
+            },
+            "status": "Unauthorized",
+            "code": 401,
+            "_postman_previewlanguage": null,
+            "header": [
+              {
+                "key": "X-Content-Type-Options",
+                "value": "nosniff"
+              },
+              {
+                "key": "X-XSS-Protection",
+                "value": "0"
+              },
+              {
+                "key": "Cache-Control",
+                "value": "no-cache, no-store, max-age=0, must-revalidate"
+              },
+              {
+                "key": "Pragma",
+                "value": "no-cache"
+              },
+              {
+                "key": "Expires",
+                "value": "0"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json;charset=ISO-8859-1"
+              },
+              {
+                "key": "Content-Length",
+                "value": "150"
+              },
+              {
+                "key": "Date",
+                "value": "Wed, 15 Apr 2026 13:52:18 GMT"
+              },
+              {
+                "key": "Keep-Alive",
+                "value": "timeout=60"
+              },
+              {
+                "key": "Connection",
+                "value": "keep-alive"
+              }
+            ],
+            "cookie": [],
+            "responseTime": null,
+            "body": "{\n    \"data\": null,\n    \"error\": {\n        \"code\": \"UNAUTHORIZED\",\n        \"message\": \"Authentication required\",\n        \"fieldErrors\": null\n    },\n    \"meta\": {\n        \"timestamp\": \"2026-04-15T19:22:18.628959\"\n    }\n}",
+            "createdAt": "2026-04-15T14:15:22.000Z",
+            "updatedAt": "2026-04-15T14:15:22.000Z",
+            "uid": "9986071-44199812-6f04-4ecf-95cb-cbbb22fcb258"
+          }
+        ],
+        "createdAt": "2026-04-15T13:47:34.000Z",
+        "updatedAt": "2026-04-15T14:15:22.000Z",
+        "uid": "9986071-bafb81af-58b4-494a-a9e3-83378658247c"
+      }
+    ],
+    "auth": {
+      "type": "basic",
+      "basic": [
+        {
+          "key": "username",
+          "value": "{{username}}",
+          "type": "string"
+        },
+        {
+          "key": "password",
+          "value": "{{password}}",
+          "type": "string"
+        }
+      ]
+    },
+    "variable": [
+      {
+        "key": "baseUrl",
+        "value": "http://localhost:8080",
+        "description": "Base URL of the running Spring Boot app"
+      },
+      {
+        "key": "username",
+        "value": "atulk",
+        "description": "Seeded test user for HTTP Basic Auth"
+      },
+      {
+        "key": "password",
+        "value": "password123",
+        "description": "Seeded test password"
+      }
+    ]
+  }
+}
