@@ -5,6 +5,7 @@ import com.practice.socialmediasearch.common.ApiResponse.FieldError;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -20,6 +21,24 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleNotFound(ResourceNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ApiResponse.error("NOT_FOUND", ex.getMessage()));
+    }
+
+    // Thrown by JPA when two concurrent writes race on the same entity version.
+    // The losing thread gets this — tell the caller to retry with fresh data.
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<ApiResponse<Void>> handleOptimisticLock(ObjectOptimisticLockingFailureException ex) {
+        String entity = ex.getPersistentClassName() != null
+                ? ex.getPersistentClassName().substring(ex.getPersistentClassName().lastIndexOf('.') + 1)
+                : "Resource";
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error("CONFLICT",
+                        entity + " was modified by another request. Please reload and try again."));
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ApiResponse<Void>> handleConflict(ConflictException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error("CONFLICT", ex.getMessage()));
     }
 
     @ExceptionHandler(ElasticsearchIndexingException.class)

@@ -1,6 +1,12 @@
 # CLAUDE.md
 
 This file provides guidance to Claude Code when working with this repository.
+
+## Agent skills
+
+- **Issue tracker**: GitHub Issues — use `gh issue create / list / edit` against `rajput2122/SocialMediaSearch`
+- **Triage labels**: see [docs/agents/triage-labels.md](docs/agents/triage-labels.md)
+- **Domain docs**: `CONTEXT.md` at the repo root; ADRs in `docs/adr/`
 It is an interview preparation project — the goal is to practice building
 well-structured Spring Boot APIs quickly and cleanly.
 

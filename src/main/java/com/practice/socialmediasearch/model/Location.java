@@ -20,4 +20,7 @@ public class Location {
 
     @Column(nullable = false)
     private String displayName;
+
+    @Version
+    private Integer version;
 }
