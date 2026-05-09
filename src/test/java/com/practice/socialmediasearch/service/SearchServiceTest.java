@@ -3,6 +3,7 @@ package com.practice.socialmediasearch.service;
 import com.practice.socialmediasearch.document.*;
 import com.practice.socialmediasearch.dto.SearchResult;
 import com.practice.socialmediasearch.dto.SearchType;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +19,7 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 
+import java.lang.reflect.Method;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -174,6 +176,41 @@ class SearchServiceTest {
         assertThat(r.getId()).isEqualTo("40");
         assertThat(r.getType()).isEqualTo(SearchType.LOCATION);
         assertThat(r.getPrimaryText()).isEqualTo("Bengaluru");
+    }
+
+    // ── circuit breaker fallback ─────────────────────────────────────────────
+
+    @Test
+    void searchFallbackReturnsEmptyPagePreservingPageable() {
+        Pageable customPageable = PageRequest.of(3, 25);
+
+        Page<SearchResult> page = searchService.searchFallback(
+                "atul", SearchType.USER, customPageable, new RuntimeException("ES down"));
+
+        assertThat(page.getContent()).isEmpty();
+        assertThat(page.getTotalElements()).isZero();
+        assertThat(page.getPageable()).isEqualTo(customPageable);
+        verifyNoInteractions(elasticsearchOperations);
+    }
+
+    @Test
+    void searchFallbackToleratesNullArgsFromUpstreamCallers() {
+        Page<SearchResult> page = searchService.searchFallback(
+                null, null, pageable, new RuntimeException("ES timeout"));
+
+        assertThat(page.getContent()).isEmpty();
+        verifyNoInteractions(elasticsearchOperations);
+    }
+
+    @Test
+    void searchMethodIsAnnotatedWithCircuitBreaker() throws NoSuchMethodException {
+        Method search = SearchService.class.getMethod(
+                "search", String.class, SearchType.class, Pageable.class);
+        CircuitBreaker annotation = search.getAnnotation(CircuitBreaker.class);
+
+        assertThat(annotation).as("@CircuitBreaker must guard the search entry point").isNotNull();
+        assertThat(annotation.name()).isEqualTo(SearchService.CIRCUIT_BREAKER_NAME);
+        assertThat(annotation.fallbackMethod()).isEqualTo("searchFallback");
     }
 
     // ── helpers ──────────────────────────────────────────────────────────────
