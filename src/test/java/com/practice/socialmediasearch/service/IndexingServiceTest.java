@@ -10,12 +10,14 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -26,6 +28,7 @@ class IndexingServiceTest {
     @Mock UserSearchRepository userSearchRepository;
     @Mock PostSearchRepository postSearchRepository;
     @Mock PageSearchRepository pageSearchRepository;
+    @Mock ElasticsearchOperations elasticsearchOperations;
 
     @InjectMocks
     private IndexingService indexingService;
@@ -212,5 +215,88 @@ class IndexingServiceTest {
         assertThatThrownBy(() -> indexingService.indexPage(page))
                 .isInstanceOf(ElasticsearchIndexingException.class)
                 .hasMessageContaining("Page");
+    }
+
+    // ── delete*Document ───────────────────────────────────────────────────────
+
+    @Test
+    void deleteTagDocumentRemovesByIdFromTagIndex() {
+        indexingService.deleteTagDocument(2L);
+        verify(elasticsearchOperations).delete("2", TagDocument.class);
+    }
+
+    @Test
+    void deleteTagDocumentThrowsIndexingExceptionOnFailure() {
+        when(elasticsearchOperations.delete(eq("2"), eq(TagDocument.class)))
+                .thenThrow(new RuntimeException("ES down"));
+
+        assertThatThrownBy(() -> indexingService.deleteTagDocument(2L))
+                .isInstanceOf(ElasticsearchIndexingException.class)
+                .hasMessageContaining("Tag")
+                .hasMessageContaining("2");
+    }
+
+    @Test
+    void deleteLocationDocumentRemovesByIdFromLocationIndex() {
+        indexingService.deleteLocationDocument(1L);
+        verify(elasticsearchOperations).delete("1", LocationDocument.class);
+    }
+
+    @Test
+    void deleteLocationDocumentThrowsIndexingExceptionOnFailure() {
+        when(elasticsearchOperations.delete(eq("1"), eq(LocationDocument.class)))
+                .thenThrow(new RuntimeException("ES down"));
+
+        assertThatThrownBy(() -> indexingService.deleteLocationDocument(1L))
+                .isInstanceOf(ElasticsearchIndexingException.class)
+                .hasMessageContaining("Location");
+    }
+
+    @Test
+    void deleteUserDocumentRemovesByIdFromUserIndex() {
+        indexingService.deleteUserDocument(5L);
+        verify(elasticsearchOperations).delete("5", UserDocument.class);
+    }
+
+    @Test
+    void deleteUserDocumentThrowsIndexingExceptionOnFailure() {
+        when(elasticsearchOperations.delete(eq("5"), eq(UserDocument.class)))
+                .thenThrow(new RuntimeException("ES down"));
+
+        assertThatThrownBy(() -> indexingService.deleteUserDocument(5L))
+                .isInstanceOf(ElasticsearchIndexingException.class)
+                .hasMessageContaining("User");
+    }
+
+    @Test
+    void deletePageDocumentRemovesByIdFromPageIndex() {
+        indexingService.deletePageDocument(20L);
+        verify(elasticsearchOperations).delete("20", PageDocument.class);
+    }
+
+    @Test
+    void deletePageDocumentThrowsIndexingExceptionOnFailure() {
+        when(elasticsearchOperations.delete(eq("20"), eq(PageDocument.class)))
+                .thenThrow(new RuntimeException("ES down"));
+
+        assertThatThrownBy(() -> indexingService.deletePageDocument(20L))
+                .isInstanceOf(ElasticsearchIndexingException.class)
+                .hasMessageContaining("Page");
+    }
+
+    @Test
+    void deletePostDocumentRemovesByIdFromPostIndex() {
+        indexingService.deletePostDocument(10L);
+        verify(elasticsearchOperations).delete("10", PostDocument.class);
+    }
+
+    @Test
+    void deletePostDocumentThrowsIndexingExceptionOnFailure() {
+        when(elasticsearchOperations.delete(eq("10"), eq(PostDocument.class)))
+                .thenThrow(new RuntimeException("ES down"));
+
+        assertThatThrownBy(() -> indexingService.deletePostDocument(10L))
+                .isInstanceOf(ElasticsearchIndexingException.class)
+                .hasMessageContaining("Post");
     }
 }

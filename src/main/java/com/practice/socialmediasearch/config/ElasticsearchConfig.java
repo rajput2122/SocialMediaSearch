@@ -9,4 +9,3 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @EnableElasticsearchRepositories(basePackages = "com.practice.socialmediasearch.repository.es")
 public class ElasticsearchConfig {
 }
-

@@ -5,6 +5,7 @@ import com.practice.socialmediasearch.exception.ElasticsearchIndexingException;
 import com.practice.socialmediasearch.model.*;
 import com.practice.socialmediasearch.repository.es.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -19,6 +20,7 @@ public class IndexingService {
     private final UserSearchRepository userSearchRepository;
     private final PostSearchRepository postSearchRepository;
     private final PageSearchRepository pageSearchRepository;
+    private final ElasticsearchOperations elasticsearchOperations;
 
     public void indexLocation(Location location) {
         try {
@@ -87,6 +89,46 @@ public class IndexingService {
             pageSearchRepository.save(document);
         } catch (Exception ex) {
             throw new ElasticsearchIndexingException("Page", page.getPageId(), ex);
+        }
+    }
+
+    public void deleteTagDocument(Long id) {
+        try {
+            elasticsearchOperations.delete(String.valueOf(id), TagDocument.class);
+        } catch (Exception ex) {
+            throw new ElasticsearchIndexingException("Tag", id, ex);
+        }
+    }
+
+    public void deleteLocationDocument(Long id) {
+        try {
+            elasticsearchOperations.delete(String.valueOf(id), LocationDocument.class);
+        } catch (Exception ex) {
+            throw new ElasticsearchIndexingException("Location", id, ex);
+        }
+    }
+
+    public void deleteUserDocument(Long id) {
+        try {
+            elasticsearchOperations.delete(String.valueOf(id), UserDocument.class);
+        } catch (Exception ex) {
+            throw new ElasticsearchIndexingException("User", id, ex);
+        }
+    }
+
+    public void deletePageDocument(Long id) {
+        try {
+            elasticsearchOperations.delete(String.valueOf(id), PageDocument.class);
+        } catch (Exception ex) {
+            throw new ElasticsearchIndexingException("Page", id, ex);
+        }
+    }
+
+    public void deletePostDocument(Long id) {
+        try {
+            elasticsearchOperations.delete(String.valueOf(id), PostDocument.class);
+        } catch (Exception ex) {
+            throw new ElasticsearchIndexingException("Post", id, ex);
         }
     }
 }
