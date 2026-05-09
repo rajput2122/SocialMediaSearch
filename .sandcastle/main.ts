@@ -1,17 +1,18 @@
 import * as sandcastle from "@ai-hero/sandcastle";
 import { docker } from "@ai-hero/sandcastle/sandboxes/docker";
 
-const MAX_ITERATIONS = 10;
-const MAX_PARALLEL = 4;
+const MAX_ITERATIONS = 5;
+const MAX_PARALLEL = 2;
 
 for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
   console.log(`\n=== Iteration ${iteration}/${MAX_ITERATIONS} ===\n`);
 
-  // Phase 1: Plan — orchestrator agent analyzes issues and picks parallelizable work
+  // Phase 1: Plan — Haiku is sufficient; just reads issues and outputs JSON
   const plan = await sandcastle.run({
     sandbox: docker(),
     name: "Planner",
-    agent: sandcastle.claudeCode("claude-sonnet-4-6"),
+    maxIterations: 1,
+    agent: sandcastle.claudeCode("claude-haiku-4-5-20251001"),
     promptFile: "./.sandcastle/plan-prompt.md",
   });
 
@@ -38,7 +39,7 @@ for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
     console.log(`  #${issue.number}: ${issue.title} → ${issue.branch}`);
   }
 
-  // Phase 2: Execute + Review — implement then review each branch, max 4 in parallel
+  // Phase 2: Execute + Review — max 2 in parallel to control cost
   let running = 0;
   const queue: (() => void)[] = [];
   const acquire = () =>
@@ -68,8 +69,11 @@ for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
           },
         });
 
+        // Implementer: 5 iterations max — a well-scoped issue fits in 3-4 turns.
+        // Reviewer removed — CI and human PR review are sufficient.
         const result = await sandbox.run({
           name: "Implementer #" + issue.number,
+          maxIterations: 5,
           agent: sandcastle.claudeCode("claude-sonnet-4-6"),
           promptFile: "./.sandcastle/implement-prompt.md",
           promptArgs: {
@@ -78,19 +82,6 @@ for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
             BRANCH: issue.branch,
           },
         });
-
-        if (result.commits.length > 0) {
-          await sandbox.run({
-            name: "Reviewer #" + issue.number,
-            agent: sandcastle.claudeCode("claude-sonnet-4-6"),
-            promptFile: "./.sandcastle/review-prompt.md",
-            promptArgs: {
-              ISSUE_NUMBER: String(issue.number),
-              ISSUE_TITLE: issue.title,
-              BRANCH: issue.branch,
-            },
-          });
-        }
 
         return result;
       } finally {
@@ -137,12 +128,12 @@ for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
     continue;
   }
 
-  // Phase 3: Merge — one agent merges all branches together
+  // Phase 3: Merge — Haiku is sufficient; just runs git commands
   await sandcastle.run({
     sandbox: docker(),
     name: "Merger",
-    maxIterations: 10,
-    agent: sandcastle.claudeCode("claude-sonnet-4-6"),
+    maxIterations: 3,
+    agent: sandcastle.claudeCode("claude-haiku-4-5-20251001"),
     promptFile: "./.sandcastle/merge-prompt.md",
     promptArgs: {
       BRANCHES: completedBranches.map((b) => `- ${b}`).join("\n"),

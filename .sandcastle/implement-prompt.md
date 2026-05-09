@@ -10,19 +10,17 @@ Work on branch {{BRANCH}}. Make commits, run tests, and close the issue when don
 
 # CONTEXT
 
-Here are the last 10 commits:
+Here are the last 5 commits:
 
 <recent-commits>
 
-!`git log -n 10 --format="%H%n%ad%n%B---" --date=short`
+!`git log -n 5 --format="%H %ad %s" --date=short`
 
 </recent-commits>
 
 # EXPLORATION
 
-Explore the repo and fill your context window with relevant information that will allow you to complete the task.
-
-Pay extra attention to test files that touch the relevant parts of the code.
+Read only the files directly relevant to the issue — the affected service, its repository, controller, and existing tests. Do not browse the whole codebase.
 
 # EXECUTION
 
@@ -33,35 +31,11 @@ If applicable, use RGR to complete the task.
 3. REPEAT until done
 4. REFACTOR the code
 
-# FEEDBACK LOOPS
+# DONE MEANS DONE
 
-Before committing, verify the code compiles and all tests pass:
+As soon as `./mvnw compile -q && ./mvnw test` passes:
 
-```bash
-./mvnw compile -q
-./mvnw test
-```
+1. Commit with message: `[SMS]: <one line summary> (closes #{{ISSUE_NUMBER}})`
+2. Output <promise>COMPLETE</promise> immediately.
 
-# COMMIT
-
-Make a git commit. The commit message must:
-
-1. Start with `[SMS]:` prefix (Social Media Search)
-2. Include task completed + PRD reference (if any)
-3. Key decisions made
-4. Files changed
-5. Blockers or notes for next iteration
-
-Keep it concise.
-
-# THE ISSUE
-
-If the task is not complete, leave a comment on the GitHub issue with what was done.
-
-Do not close the issue - this will be done later.
-
-Once complete, output <promise>COMPLETE</promise>.
-
-# FINAL RULES
-
-ONLY WORK ON A SINGLE TASK.
+Do not explore further. Do not refactor. Do not add extra tests. Stop.
