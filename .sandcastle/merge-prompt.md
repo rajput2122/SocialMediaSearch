@@ -1,27 +1,42 @@
 # TASK
 
-Merge the following branches into the current branch:
+Open a pull request for each of the following branches. Do NOT merge anything directly.
 
 {{BRANCHES}}
 
 For each branch:
 
-1. Run `git merge <branch> --no-edit`
-2. If there are merge conflicts, resolve them intelligently by reading both sides and choosing the correct resolution
-3. After resolving conflicts, verify the code compiles and tests pass:
+1. Push the branch to origin if not already pushed:
    ```bash
-   ./mvnw compile -q
-   ./mvnw test
-4. If tests fail, fix the issues before proceeding to the next branch
+   git push origin <branch>
+   ```
 
-After all branches are merged, make a single commit summarizing the merge.
+2. Open a PR using this exact format:
+   ```bash
+   gh pr create \
+     --title "[SMS] #<issue-number>: <issue-title>" \
+     --body "..." \
+     --base master \
+     --head <branch> \
+     --label "sandcastle"
+   ```
 
-# CLOSE ISSUES
+   PR body must include these sections:
+   - **Summary** — what was built and why (2-3 sentences)
+   - **Key decisions** — non-obvious choices made during implementation
+   - **Files changed** — list of files and what changed in each
+   - **Test coverage** — what is tested and what is not
+   - **Follow-ups** — anything left out of scope
 
-For each branch that was merged, close its issue. If there are any parent issues (such as PRD's) which closing the issue would complete, close those too.
+3. Link the issue in the PR body with `Closes #<number>`.
 
-Here are all the issues:
+4. Remove the `sandcastle-ready` label from the issue:
+   ```bash
+   gh issue edit <number> --remove-label "sandcastle-ready"
+   ```
+
+Here are the issues completed:
 
 {{ISSUES}}
 
-Once you've merged everything you can, output <promise>COMPLETE</promise>.
+Once all PRs are opened, output <promise>COMPLETE</promise>.

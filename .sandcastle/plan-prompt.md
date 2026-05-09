@@ -1,10 +1,10 @@
 # ISSUES
 
-Here are the open issues in the repo:
+Here are the open issues labelled `sandcastle-ready`:
 
 <issues-json>
 
-!`gh issue list --state open --json number,title,body,labels,comments --jq '[.[] | {number, title, body, labels: [.labels[].name], comments: [.comments[].body]}]'`
+!`gh issue list --state open --label "sandcastle-ready" --json number,title,body,labels --jq '[.[] | {number, title, body, labels: [.labels[].name]}]'`
 
 </issues-json>
 
@@ -33,3 +33,9 @@ Output your plan as a JSON object wrapped in `<plan>` tags:
 </plan>
 
 Include only unblocked issues. If every issue is blocked, include the single highest-priority candidate (the one with the fewest or weakest dependencies).
+
+If there are no issues with the `sandcastle-ready` label, output:
+
+<plan>
+{"issues": []}
+</plan>

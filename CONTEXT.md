@@ -58,6 +58,28 @@ Location ←── User ──── Post ──── Tag
 
 ---
 
+## Sandcastle Loop
+
+**Sandcastle Loop**
+The agentic development loop defined in `.sandcastle/`. Triggered by applying the `sandcastle-ready` label to a GitHub issue. Runs four agents in sequence: Planner → Implementer → Reviewer → Merger.
+
+**Planner**
+Reads all `sandcastle-ready` issues, builds a dependency graph, and selects unblocked issues to work in parallel. Outputs a `<plan>` JSON. Runs on Haiku (read-only reasoning task).
+
+**Implementer**
+Implements a single issue on an isolated branch using TDD (Red→Green→Refactor). Runs on Sonnet (code quality matters). Capped at 20 iterations.
+
+**Reviewer**
+Reads the diff on the implemented branch, stress-tests edge cases, and applies CODING_STANDARDS. Runs on Haiku. Capped at 1 iteration.
+
+**Merger**
+Opens a pull request per completed branch following ADR 0004 format. Never merges directly — humans approve. Removes the `sandcastle-ready` label after opening the PR.
+
+**Sandcastle-Ready**
+The GitHub label that opts an issue into the loop. Engineers apply this label when an issue is scoped, has acceptance criteria, and is safe to hand to an agent. Removing or not applying the label keeps an issue out of the loop.
+
+---
+
 ## Audit Fields
 
 All entities carry: `createdAt` (`@CreatedDate`), `updatedAt` (`@LastModifiedDate`), `deletedAt` (nullable, set on soft-delete), `version` (`@Version` for optimistic locking). `UserCredential` is excluded — it shares the `User` lifecycle.
