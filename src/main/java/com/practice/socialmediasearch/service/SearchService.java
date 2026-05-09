@@ -7,7 +7,9 @@ import com.practice.socialmediasearch.document.TagDocument;
 import com.practice.socialmediasearch.document.UserDocument;
 import com.practice.socialmediasearch.dto.SearchResult;
 import com.practice.socialmediasearch.dto.SearchType;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -19,12 +21,16 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SearchService {
 
+    static final String CIRCUIT_BREAKER_NAME = "elasticsearch";
+
     private final ElasticsearchOperations elasticsearchOperations;
 
+    @CircuitBreaker(name = CIRCUIT_BREAKER_NAME, fallbackMethod = "searchFallback")
     public Page<SearchResult> search(String query, SearchType type, Pageable pageable) {
         if (query == null || query.isBlank() || type == null) {
             return Page.empty(pageable);
@@ -37,6 +43,12 @@ public class SearchService {
             case TAG -> searchTags(query, pageable);
             case LOCATION -> searchLocations(query, pageable);
         };
+    }
+
+    @SuppressWarnings("unused") // invoked reflectively by Resilience4j when ES fails or the breaker is open
+    public Page<SearchResult> searchFallback(String query, SearchType type, Pageable pageable, Throwable ex) {
+        log.warn("ES search fallback engaged for query='{}' type={}: {}", query, type, ex.toString());
+        return Page.empty(pageable);
     }
 
     private Page<SearchResult> searchUsers(String query, Pageable pageable) {
