@@ -156,18 +156,22 @@ The script requires the app to be running (`./mvnw spring-boot:run`) with Elasti
 ```
 src/main/java/com/practice/socialmediasearch/
 ├── controller/       # REST layer — HTTP in, HTTP out
-├── service/          # Business logic (SearchService, IndexingService)
+├── service/          # Business logic (SearchService, IndexingService,
+│                     #   IndexingEventPublisher, IndexingEventListener,
+│                     #   IndexingDeadLetterQueue)
 ├── repository/
 │   ├── jpa/          # Spring Data JPA repositories (H2)
 │   └── es/           # Spring Data Elasticsearch repositories
+├── event/            # Indexing events (sealed IndexingEvent + 5 records)
 ├── model/            # JPA entities (source of truth)
 ├── document/         # Elasticsearch documents (search index)
 ├── dto/              # Request/response objects
 ├── exception/        # Custom exceptions + GlobalExceptionHandler
-├── config/           # SecurityConfig, ElasticsearchConfig, DataInitializer
+├── config/           # SecurityConfig, ElasticsearchConfig,
+│                     #   AsyncIndexingConfig, DataInitializer
 └── common/           # ApiResponse wrapper
 ```
 
-**Dual-write pattern:** every write goes to H2 (JPA) first, then Elasticsearch via `IndexingService`. H2 is the source of truth; ES is the search index.
+**Async dual-write:** writers commit to H2 (source of truth), then publish a typed `IndexingEvent`. After the JPA transaction commits, an `@Async` listener consumes the event on the `indexingExecutor` thread pool and writes to Elasticsearch. ES failures are recorded in `IndexingDeadLetterQueue` instead of being propagated to the caller, so a degraded ES never breaks the write path. Search results may lag writes by a few seconds — eventual consistency is acceptable on the search index.
 
 **Search path:** all queries go directly to Elasticsearch — never to H2.

@@ -129,9 +129,11 @@
                                 <exclude>com/practice/socialmediasearch/SocialMediaSearchApplication.class</exclude>
                                 <exclude>com/practice/socialmediasearch/config/DataInitializer.class</exclude>
                                 <exclude>com/practice/socialmediasearch/config/ElasticsearchConfig.class</exclude>
+                                <exclude>com/practice/socialmediasearch/config/AsyncIndexingConfig.class</exclude>
                                 <exclude>com/practice/socialmediasearch/model/*.class</exclude>
                                 <exclude>com/practice/socialmediasearch/document/*.class</exclude>
                                 <exclude>com/practice/socialmediasearch/dto/response/*.class</exclude>
+                                <exclude>com/practice/socialmediasearch/event/*.class</exclude>
                                 <exclude>com/practice/socialmediasearch/repository/**/*.class</exclude>
                             </excludes>
                         </configuration>

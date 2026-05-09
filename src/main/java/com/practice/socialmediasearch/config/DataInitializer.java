@@ -2,7 +2,7 @@ package com.practice.socialmediasearch.config;
 
 import com.practice.socialmediasearch.model.*;
 import com.practice.socialmediasearch.repository.jpa.*;
-import com.practice.socialmediasearch.service.IndexingService;
+import com.practice.socialmediasearch.service.IndexingEventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -24,7 +24,7 @@ public class DataInitializer implements CommandLineRunner {
     private final UserCredentialRepository userCredentialRepository;
     private final PostRepository postRepository;
     private final PageRepository pageRepository;
-    private final IndexingService indexingService;
+    private final IndexingEventPublisher indexingEventPublisher;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -35,16 +35,16 @@ public class DataInitializer implements CommandLineRunner {
         // Locations
         Location bengaluru = locationRepository.save(Location.builder().displayName("Bengaluru").build());
         Location mumbai = locationRepository.save(Location.builder().displayName("Mumbai").build());
-        indexingService.indexLocation(bengaluru);
-        indexingService.indexLocation(mumbai);
+        indexingEventPublisher.publishLocation(bengaluru);
+        indexingEventPublisher.publishLocation(mumbai);
 
         // Tags
         Tag javaTag = tagRepository.save(Tag.builder().tagName("java").build());
         Tag springTag = tagRepository.save(Tag.builder().tagName("spring").build());
         Tag microservicesTag = tagRepository.save(Tag.builder().tagName("microservices").build());
-        indexingService.indexTag(javaTag);
-        indexingService.indexTag(springTag);
-        indexingService.indexTag(microservicesTag);
+        indexingEventPublisher.publishTag(javaTag);
+        indexingEventPublisher.publishTag(springTag);
+        indexingEventPublisher.publishTag(microservicesTag);
 
         // Users
         User atulk = userRepository.save(User.builder()
@@ -59,7 +59,7 @@ public class DataInitializer implements CommandLineRunner {
                 .user(atulk)
                 .password(passwordEncoder.encode("password123"))
                 .build());
-        indexingService.indexUser(atulk);
+        indexingEventPublisher.publishUser(atulk);
 
         User priyas = userRepository.save(User.builder()
                 .name("Priya Sharma")
@@ -73,7 +73,7 @@ public class DataInitializer implements CommandLineRunner {
                 .user(priyas)
                 .password(passwordEncoder.encode("password123"))
                 .build());
-        indexingService.indexUser(priyas);
+        indexingEventPublisher.publishUser(priyas);
 
         // Posts
         Post post1 = postRepository.save(Post.builder()
@@ -83,7 +83,7 @@ public class DataInitializer implements CommandLineRunner {
                 .postedOn(LocalDateTime.now())
                 .tags(List.of(javaTag, springTag))
                 .build());
-        indexingService.indexPost(post1);
+        indexingEventPublisher.publishPost(post1);
 
         Post post2 = postRepository.save(Post.builder()
                 .caption("Exploring cloud native applications with Spring")
@@ -92,7 +92,7 @@ public class DataInitializer implements CommandLineRunner {
                 .postedOn(LocalDateTime.now())
                 .tags(List.of(springTag, microservicesTag))
                 .build());
-        indexingService.indexPost(post2);
+        indexingEventPublisher.publishPost(post2);
 
         // Pages
         Page javaPage = pageRepository.save(Page.builder()
@@ -100,14 +100,14 @@ public class DataInitializer implements CommandLineRunner {
                 .bio("A community for Java developers to connect and share")
                 .location(bengaluru)
                 .build());
-        indexingService.indexPage(javaPage);
+        indexingEventPublisher.publishPage(javaPage);
 
         Page springPage = pageRepository.save(Page.builder()
                 .pageName("Spring Framework Fans")
                 .bio("Discussions around the Spring ecosystem")
                 .location(mumbai)
                 .build());
-        indexingService.indexPage(springPage);
+        indexingEventPublisher.publishPage(springPage);
 
         log.info("Seed data loaded. Test credentials — username: atulk, password: password123");
     }
