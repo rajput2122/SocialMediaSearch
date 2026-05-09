@@ -62,7 +62,7 @@ On startup the app seeds sample data automatically (2 users, 2 posts, 2 pages, 3
 ### Search
 
 ```
-GET /api/v1/search?q={query}&type={type}&page={page}&size={size}
+GET /api/v1/search?q={query}&type={type}&size={size}&cursor={cursor}
 ```
 
 **Authentication:** HTTP Basic Auth required for all requests.
@@ -71,8 +71,10 @@ GET /api/v1/search?q={query}&type={type}&page={page}&size={size}
 |---|---|---|
 | `q` | Yes | Any non-blank string |
 | `type` | Yes | `USER`, `POST`, `PAGE`, `TAG`, `LOCATION` |
-| `page` | No | 0-based page index (default `0`) |
-| `size` | No | Page size (default `10`) |
+| `size` | No | Page size (default `10`, max `100`) |
+| `cursor` | No | Opaque cursor returned as `nextCursor` from a previous page |
+
+**Pagination:** uses Elasticsearch `search_after` with a `(_score desc, _id asc)` sort. Pages are stepped forward via the `cursor` param — no random page access. Sidesteps ES `from`/`size` deep-page memory cost and the default `index.max_result_window` of 10,000.
 
 **Response envelope**
 
@@ -80,15 +82,16 @@ GET /api/v1/search?q={query}&type={type}&page={page}&size={size}
 {
   "data": {
     "content": [...],
-    "totalElements": 2,
-    "totalPages": 1,
     "size": 10,
-    "number": 0
+    "totalHits": 1234,
+    "nextCursor": "WzEuNSwiMSJd"
   },
   "error": null,
   "meta": { "timestamp": "2026-04-15T10:00:00Z" }
 }
 ```
+
+`nextCursor` is `null` on the last page.
 
 **Examples**
 
@@ -107,6 +110,9 @@ curl -u atulk:password123 "http://localhost:8080/api/v1/search?q=microservices&t
 
 # Search locations
 curl -u atulk:password123 "http://localhost:8080/api/v1/search?q=bengaluru&type=LOCATION"
+
+# Step to next page using the cursor returned by the previous response
+curl -u atulk:password123 "http://localhost:8080/api/v1/search?q=spring&type=POST&size=10&cursor=WzEuNSwiMSJd"
 
 # No credentials → 401
 curl "http://localhost:8080/api/v1/search?q=atul&type=USER"

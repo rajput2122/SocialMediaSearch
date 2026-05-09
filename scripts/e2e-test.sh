@@ -62,37 +62,37 @@ echo ""
 
 # ── Search: USER ──────────────────────────────────────────────
 echo "[1] Search USER by name/username"
-do_request -u "$USER:$PASS" "$BASE_URL?q=atul&type=USER&page=0&size=10"
+do_request -u "$USER:$PASS" "$BASE_URL?q=atul&type=USER&size=10"
 assert_status "USER search returns 200" "200"
-assert_json_gt "USER search has results" "d['data']['totalElements']"
+assert_json_gt "USER search has results" "d['data']['totalHits']"
 
 # ── Search: POST ──────────────────────────────────────────────
 echo ""
 echo "[2] Search POST by caption"
-do_request -u "$USER:$PASS" "$BASE_URL?q=spring&type=POST&page=0&size=10"
+do_request -u "$USER:$PASS" "$BASE_URL?q=spring&type=POST&size=10"
 assert_status "POST search returns 200" "200"
-assert_json_gt "POST search has results" "d['data']['totalElements']"
+assert_json_gt "POST search has results" "d['data']['totalHits']"
 
 # ── Search: PAGE ──────────────────────────────────────────────
 echo ""
 echo "[3] Search PAGE by name"
-do_request -u "$USER:$PASS" "$BASE_URL?q=java&type=PAGE&page=0&size=10"
+do_request -u "$USER:$PASS" "$BASE_URL?q=java&type=PAGE&size=10"
 assert_status "PAGE search returns 200" "200"
-assert_json_gt "PAGE search has results" "d['data']['totalElements']"
+assert_json_gt "PAGE search has results" "d['data']['totalHits']"
 
 # ── Search: TAG ───────────────────────────────────────────────
 echo ""
 echo "[4] Search TAG by name"
-do_request -u "$USER:$PASS" "$BASE_URL?q=microservices&type=TAG&page=0&size=10"
+do_request -u "$USER:$PASS" "$BASE_URL?q=microservices&type=TAG&size=10"
 assert_status "TAG search returns 200" "200"
-assert_json_gt "TAG search has results" "d['data']['totalElements']"
+assert_json_gt "TAG search has results" "d['data']['totalHits']"
 
 # ── Search: LOCATION ──────────────────────────────────────────
 echo ""
 echo "[5] Search LOCATION by display name"
-do_request -u "$USER:$PASS" "$BASE_URL?q=bengaluru&type=LOCATION&page=0&size=10"
+do_request -u "$USER:$PASS" "$BASE_URL?q=bengaluru&type=LOCATION&size=10"
 assert_status "LOCATION search returns 200" "200"
-assert_json_gt "LOCATION search has results" "d['data']['totalElements']"
+assert_json_gt "LOCATION search has results" "d['data']['totalHits']"
 
 # ── Auth: No credentials ──────────────────────────────────────
 echo ""
@@ -127,9 +127,30 @@ assert_json "error.code is BAD_REQUEST" "BAD_REQUEST" "d['error']['code']"
 # ── Pagination ────────────────────────────────────────────────
 echo ""
 echo "[10] Pagination — custom page size"
-do_request -u "$USER:$PASS" "$BASE_URL?q=spring&type=POST&page=0&size=1"
+do_request -u "$USER:$PASS" "$BASE_URL?q=spring&type=POST&size=1"
 assert_status "Pagination returns 200" "200"
 assert_json "Page size is 1" "1" "d['data']['size']"
+
+# ── Pagination: cursor ────────────────────────────────────────
+echo ""
+echo "[11] Pagination — cursor-based search_after"
+do_request -u "$USER:$PASS" "$BASE_URL?q=a&type=USER&size=1"
+assert_status "First page returns 200" "200"
+CURSOR=$(echo "$BODY" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['data'].get('nextCursor') or '')" 2>/dev/null || echo "")
+if [[ -n "$CURSOR" ]]; then
+  pass "First page returned a nextCursor"
+  do_request -u "$USER:$PASS" "$BASE_URL?q=a&type=USER&size=1&cursor=$CURSOR"
+  assert_status "Cursor follow-up returns 200" "200"
+else
+  pass "First page had no nextCursor (no more results)"
+fi
+
+# ── Pagination: bad cursor ────────────────────────────────────
+echo ""
+echo "[12] Pagination — invalid cursor"
+do_request -u "$USER:$PASS" "$BASE_URL?q=atul&type=USER&cursor=not-base64!!!"
+assert_status "Bad cursor returns 400" "400"
+assert_json "error.code is BAD_CURSOR" "BAD_CURSOR" "d['error']['code']"
 
 # ── Summary ───────────────────────────────────────────────────
 echo ""

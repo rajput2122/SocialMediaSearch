@@ -22,6 +22,12 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error("NOT_FOUND", ex.getMessage()));
     }
 
+    @ExceptionHandler(BadCursorException.class)
+    public ResponseEntity<ApiResponse<Void>> handleBadCursor(BadCursorException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error("BAD_CURSOR", ex.getMessage()));
+    }
+
     @ExceptionHandler(ElasticsearchIndexingException.class)
     public ResponseEntity<ApiResponse<Void>> handleIndexingFailure(ElasticsearchIndexingException ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

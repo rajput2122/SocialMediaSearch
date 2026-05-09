@@ -13,6 +13,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -56,7 +57,7 @@ class GlobalExceptionHandlerTest {
     @Test
     @WithMockUser
     void handlesElasticsearchIndexingException() throws Exception {
-        when(searchService.search(any(), any(), any()))
+        when(searchService.search(any(), any(), anyInt(), any()))
                 .thenThrow(new ElasticsearchIndexingException("User", 1L, new RuntimeException("ES down")));
 
         mockMvc.perform(get("/api/v1/search")
@@ -71,7 +72,7 @@ class GlobalExceptionHandlerTest {
     @Test
     @WithMockUser
     void handlesGenericException() throws Exception {
-        when(searchService.search(any(), any(), any()))
+        when(searchService.search(any(), any(), anyInt(), any()))
                 .thenThrow(new RuntimeException("unexpected"));
 
         mockMvc.perform(get("/api/v1/search")

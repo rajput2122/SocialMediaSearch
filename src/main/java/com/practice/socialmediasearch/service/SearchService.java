@@ -5,68 +5,65 @@ import com.practice.socialmediasearch.document.PageDocument;
 import com.practice.socialmediasearch.document.PostDocument;
 import com.practice.socialmediasearch.document.TagDocument;
 import com.practice.socialmediasearch.document.UserDocument;
+import com.practice.socialmediasearch.dto.CursorCodec;
+import com.practice.socialmediasearch.dto.SearchPage;
 import com.practice.socialmediasearch.dto.SearchResult;
 import com.practice.socialmediasearch.dto.SearchType;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
+import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
 public class SearchService {
 
+    private static final Sort DEFAULT_SORT =
+            Sort.by(Sort.Order.desc("_score"), Sort.Order.asc("_id"));
+
     private final ElasticsearchOperations elasticsearchOperations;
 
-    public Page<SearchResult> search(String query, SearchType type, Pageable pageable) {
+    public SearchPage<SearchResult> search(String query, SearchType type, int size, String cursor) {
         if (query == null || query.isBlank() || type == null) {
-            return Page.empty(pageable);
+            return SearchPage.empty(size);
         }
 
         return switch (type) {
-            case USER -> searchUsers(query, pageable);
-            case POST -> searchPosts(query, pageable);
-            case PAGE -> searchPages(query, pageable);
-            case TAG -> searchTags(query, pageable);
-            case LOCATION -> searchLocations(query, pageable);
+            case USER -> searchUsers(query, size, cursor);
+            case POST -> searchPosts(query, size, cursor);
+            case PAGE -> searchPages(query, size, cursor);
+            case TAG -> searchTags(query, size, cursor);
+            case LOCATION -> searchLocations(query, size, cursor);
         };
     }
 
-    private Page<SearchResult> searchUsers(String query, Pageable pageable) {
-        NativeQuery nativeQuery = NativeQuery.builder()
-                .withQuery(q -> q.multiMatch(mm -> mm
+    private SearchPage<SearchResult> searchUsers(String query, int size, String cursor) {
+        return runSearch(size, cursor, UserDocument.class,
+                qb -> qb.withQuery(q -> q.multiMatch(mm -> mm
                         .query(query)
                         .fields("name", "username", "bio")
-                        .fuzziness("AUTO")))
-                .withPageable(pageable)
-                .build();
-
-        SearchHits<UserDocument> hits = elasticsearchOperations.search(nativeQuery, UserDocument.class);
-        List<SearchResult> content = hits.getSearchHits().stream()
-                .map(SearchHit::getContent)
-                .map(doc -> SearchResult.builder()
+                        .fuzziness("AUTO"))),
+                doc -> SearchResult.builder()
                         .id(doc.getId())
                         .type(SearchType.USER)
                         .primaryText(doc.getName())
                         .secondaryText(doc.getUsername())
                         .locationName(doc.getLocationName())
-                        .build())
-                .toList();
-
-        return new PageImpl<>(content, pageable, hits.getTotalHits());
+                        .build());
     }
 
-    private Page<SearchResult> searchPosts(String query, Pageable pageable) {
-        // caption is text (fuzziness applies); tags is keyword (exact term match via should clause)
-        NativeQuery nativeQuery = NativeQuery.builder()
-                .withQuery(q -> q.bool(b -> b
+    private SearchPage<SearchResult> searchPosts(String query, int size, String cursor) {
+        return runSearch(size, cursor, PostDocument.class,
+                qb -> qb.withQuery(q -> q.bool(b -> b
                         .should(s -> s.multiMatch(mm -> mm
                                 .query(query)
                                 .fields("caption")
@@ -74,91 +71,96 @@ public class SearchService {
                         .should(s -> s.term(t -> t
                                 .field("tags")
                                 .value(query)))
-                        .minimumShouldMatch("1")))
-                .withPageable(pageable)
-                .build();
-
-        SearchHits<PostDocument> hits = elasticsearchOperations.search(nativeQuery, PostDocument.class);
-        List<SearchResult> content = hits.getSearchHits().stream()
-                .map(SearchHit::getContent)
-                .map(doc -> SearchResult.builder()
+                        .minimumShouldMatch("1"))),
+                doc -> SearchResult.builder()
                         .id(doc.getId())
                         .type(SearchType.POST)
                         .primaryText(doc.getCaption())
                         .secondaryText(doc.getUserId())
                         .locationName(doc.getLocationName())
                         .tags(doc.getTags())
-                        .build())
-                .toList();
-
-        return new PageImpl<>(content, pageable, hits.getTotalHits());
+                        .build());
     }
 
-    private Page<SearchResult> searchPages(String query, Pageable pageable) {
-        NativeQuery nativeQuery = NativeQuery.builder()
-                .withQuery(q -> q.multiMatch(mm -> mm
+    private SearchPage<SearchResult> searchPages(String query, int size, String cursor) {
+        return runSearch(size, cursor, PageDocument.class,
+                qb -> qb.withQuery(q -> q.multiMatch(mm -> mm
                         .query(query)
                         .fields("pageName", "bio")
-                        .fuzziness("AUTO")))
-                .withPageable(pageable)
-                .build();
-
-        SearchHits<PageDocument> hits = elasticsearchOperations.search(nativeQuery, PageDocument.class);
-        List<SearchResult> content = hits.getSearchHits().stream()
-                .map(SearchHit::getContent)
-                .map(doc -> SearchResult.builder()
+                        .fuzziness("AUTO"))),
+                doc -> SearchResult.builder()
                         .id(doc.getId())
                         .type(SearchType.PAGE)
                         .primaryText(doc.getPageName())
                         .secondaryText(doc.getBio())
-                        .build())
-                .toList();
-
-        return new PageImpl<>(content, pageable, hits.getTotalHits());
+                        .build());
     }
 
-    private Page<SearchResult> searchTags(String query, Pageable pageable) {
-        NativeQuery nativeQuery = NativeQuery.builder()
-                .withQuery(q -> q.multiMatch(mm -> mm
+    private SearchPage<SearchResult> searchTags(String query, int size, String cursor) {
+        return runSearch(size, cursor, TagDocument.class,
+                qb -> qb.withQuery(q -> q.multiMatch(mm -> mm
                         .query(query)
                         .fields("tagName")
-                        .fuzziness("AUTO")))
-                .withPageable(pageable)
-                .build();
-
-        SearchHits<TagDocument> hits = elasticsearchOperations.search(nativeQuery, TagDocument.class);
-        List<SearchResult> content = hits.getSearchHits().stream()
-                .map(SearchHit::getContent)
-                .map(doc -> SearchResult.builder()
+                        .fuzziness("AUTO"))),
+                doc -> SearchResult.builder()
                         .id(doc.getId())
                         .type(SearchType.TAG)
                         .primaryText(doc.getTagName())
-                        .build())
-                .toList();
-
-        return new PageImpl<>(content, pageable, hits.getTotalHits());
+                        .build());
     }
 
-    private Page<SearchResult> searchLocations(String query, Pageable pageable) {
-        NativeQuery nativeQuery = NativeQuery.builder()
-                .withQuery(q -> q.multiMatch(mm -> mm
+    private SearchPage<SearchResult> searchLocations(String query, int size, String cursor) {
+        return runSearch(size, cursor, LocationDocument.class,
+                qb -> qb.withQuery(q -> q.multiMatch(mm -> mm
                         .query(query)
                         .fields("displayName")
-                        .fuzziness("AUTO")))
-                .withPageable(pageable)
-                .build();
-
-        SearchHits<LocationDocument> hits = elasticsearchOperations.search(nativeQuery, LocationDocument.class);
-        List<SearchResult> content = hits.getSearchHits().stream()
-                .map(SearchHit::getContent)
-                .map(doc -> SearchResult.builder()
+                        .fuzziness("AUTO"))),
+                doc -> SearchResult.builder()
                         .id(doc.getId())
                         .type(SearchType.LOCATION)
                         .primaryText(doc.getDisplayName())
-                        .build())
+                        .build());
+    }
+
+    private <T> SearchPage<SearchResult> runSearch(
+            int size,
+            String cursor,
+            Class<T> docClass,
+            Consumer<NativeQueryBuilder> queryCustomizer,
+            Function<T, SearchResult> mapper) {
+
+        NativeQueryBuilder builder = NativeQuery.builder()
+                .withSort(DEFAULT_SORT)
+                .withPageable(PageRequest.of(0, size));
+        queryCustomizer.accept(builder);
+
+        List<Object> searchAfter = CursorCodec.decode(cursor);
+        if (searchAfter != null) {
+            builder.withSearchAfter(searchAfter);
+        }
+
+        SearchHits<T> hits = elasticsearchOperations.search(builder.build(), docClass);
+        List<SearchHit<T>> hitList = hits.getSearchHits();
+
+        List<SearchResult> content = hitList.stream()
+                .map(SearchHit::getContent)
+                .map(mapper)
                 .toList();
 
-        return new PageImpl<>(content, pageable, hits.getTotalHits());
+        String nextCursor = nextCursor(hitList, size);
+
+        return SearchPage.<SearchResult>builder()
+                .content(content)
+                .size(size)
+                .totalHits(hits.getTotalHits())
+                .nextCursor(nextCursor)
+                .build();
+    }
+
+    private <T> String nextCursor(List<SearchHit<T>> hits, int size) {
+        if (hits.size() < size) {
+            return null;
+        }
+        return CursorCodec.encode(hits.get(hits.size() - 1).getSortValues());
     }
 }
-

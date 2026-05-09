@@ -1,14 +1,14 @@
 package com.practice.socialmediasearch.controller;
 
 import com.practice.socialmediasearch.common.ApiResponse;
+import com.practice.socialmediasearch.dto.SearchPage;
 import com.practice.socialmediasearch.dto.SearchResult;
 import com.practice.socialmediasearch.dto.SearchType;
 import com.practice.socialmediasearch.service.SearchService;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,12 +25,13 @@ public class SearchController {
     private final SearchService searchService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<SearchResult>>> search(
+    public ResponseEntity<ApiResponse<SearchPage<SearchResult>>> search(
             @RequestParam("q") @NotBlank(message = "q is required") String query,
             @RequestParam SearchType type,
-            @PageableDefault(size = 10) Pageable pageable) {
-        Page<SearchResult> data = searchService.search(query, type, pageable);
+            @RequestParam(defaultValue = "10") @Min(value = 1, message = "size must be >= 1")
+                    @Max(value = 100, message = "size must be <= 100") int size,
+            @RequestParam(required = false) String cursor) {
+        SearchPage<SearchResult> data = searchService.search(query, type, size, cursor);
         return ResponseEntity.ok(ApiResponse.success(data));
     }
 }
-
