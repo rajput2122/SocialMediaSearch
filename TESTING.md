@@ -137,15 +137,15 @@ Gate: **80% minimum** — `./mvnw verify` fails if coverage drops below this thr
 
 | Metric | Result |
 |---|---|
-| Instruction coverage | **82%** (1,098 / 1,328 instructions) |
-| Tests | **37 tests, 0 failures** |
+| Instruction coverage | **>80%** (JaCoCo gate) |
+| Tests | **55 tests, 0 failures** |
 | Build gate | **PASS** |
 
 ### By package
 
 | Package | Coverage | Notes |
 |---|---|---|
-| `service` | **100%** | SearchService, IndexingService, CustomUserDetailsService |
+| `service` | **100%** | SearchService, IndexingService, IndexingEventPublisher, IndexingEventListener, IndexingDeadLetterQueue, CustomUserDetailsService |
 | `common` | **100%** | ApiResponse and inner classes |
 | `dto` | **100%** | SearchResult, SearchType |
 | `controller` | **100%** | SearchController |
@@ -225,9 +225,9 @@ Meeting the <200ms p99 latency target is achieved by a combination of architectu
 
 All search queries go **directly to Elasticsearch** — the relational database (H2 / production SQL) is never queried on the search path. Elasticsearch is optimised for full-text search: inverted indexes, BKD trees for numerics, and segment-level caching are built in. A SQL `LIKE '%spring%'` scan on a 5M-row table would take seconds; an ES `multi_match` on an indexed field takes single-digit milliseconds.
 
-### Dual-write keeps the index fresh
+### Async dual-write keeps the write path fast
 
-Writes go to JPA first (source of truth) and immediately to Elasticsearch via `IndexingService`. There is no async replication lag — the ES index is updated in the same request. Search latency is not affected by stale index data.
+Writers commit to JPA (source of truth) and then publish a typed `IndexingEvent`. After the JPA transaction commits, an `@Async` listener on the `indexingExecutor` thread pool consumes the event and writes to Elasticsearch. The HTTP response is returned as soon as H2 commits — the ES round-trip is no longer on the request thread, so write p99 is bounded by H2 + event publish (microseconds), not by ES backpressure. Failures are routed to `IndexingDeadLetterQueue` instead of being thrown to the caller, so a degraded ES never breaks ingestion. The trade-off is eventual consistency: search results may lag writes by the queue + ES round-trip (typically <1s under healthy load), which is acceptable on a social platform.
 
 ### Query design
 
